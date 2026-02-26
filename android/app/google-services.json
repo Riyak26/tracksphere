@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1069173277238",
+    "project_id": "clg-project-a8925",
+    "storage_bucket": "clg-project-a8925.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1069173277238:android:9e14b4f349af913d354e97",
+        "android_client_info": {
+          "package_name": "com.example.demo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD29K8CVbmX23hfD8JcLUs3V92Qt4yFj_8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
