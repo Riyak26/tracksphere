@@ -87,19 +87,73 @@ class HodHomePage extends StatelessWidget {
 
                       const SizedBox(height: 15),
 
-                      Wrap(
-                        spacing: 10,
-                        children: [
-                          _chip(context, "Students Details",
-                              groupId, 0),
-                          _chip(context, "Submission",
-                              groupId, 1),
-                          _chip(context, "Marks Evaluation",
-                              groupId, 2),
-                          _chip(context, "Marksheet",
-                              groupId, 3),
-                        ],
-                      ),
+                     Wrap(
+  spacing: 6, // reduced space
+  runSpacing: 6,
+  children: [
+
+    _chip(context, "Students Details", groupId, 0),
+
+    _chip(context, "Submission", groupId, 1),
+
+    _chip(context, "Marks Evaluation", groupId, 2),
+
+    _chip(context, "Marksheet", groupId, 3),
+
+    /// ✅ APPROVE BUTTON ADDED HERE
+    StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('groups')
+          .doc(groupId)
+          .snapshots(),
+      builder: (context, snap) {
+
+        bool isApproved = false;
+
+        if (snap.hasData && snap.data!.exists) {
+          final data =
+              snap.data!.data() as Map<String, dynamic>;
+          isApproved = data['approved'] ?? false;
+        }
+
+        return ActionChip(
+          padding: const EdgeInsets.symmetric(
+              horizontal: 8, vertical: 0),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isApproved)
+                const Icon(Icons.check,
+                    size: 16, color: Colors.green),
+              if (isApproved)
+                const SizedBox(width: 4),
+              Text(isApproved ? "Approved" : "Approve"),
+            ],
+          ),
+          onPressed: isApproved
+              ? null
+              : () async {
+                  await FirebaseFirestore.instance
+                      .collection('groups')
+                      .doc(groupId)
+                      .set(
+                    {'approved': true},
+                    SetOptions(merge: true),
+                  );
+
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text("Project Approved Successfully"),
+                    ),
+                  );
+                },
+        );
+      },
+    ),
+  ],
+)
                     ],
                   ),
                 ),

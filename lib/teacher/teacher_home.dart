@@ -40,7 +40,6 @@ class _TeacherHomeState extends State<TeacherHome> {
         body: Column(
           children: [
 
-            // ✅ SEARCH BAR ADDED HERE
             Padding(
               padding: const EdgeInsets.all(12),
               child: TextField(
@@ -62,7 +61,6 @@ class _TeacherHomeState extends State<TeacherHome> {
               ),
             ),
 
-            // ✅ GROUP LIST
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
@@ -70,6 +68,7 @@ class _TeacherHomeState extends State<TeacherHome> {
                     .orderBy('createdAt', descending: true)
                     .snapshots(),
                 builder: (context, snapshot) {
+
                   if (snapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const Center(
@@ -84,7 +83,6 @@ class _TeacherHomeState extends State<TeacherHome> {
 
                   final groups = snapshot.data!.docs;
 
-                  // ✅ FILTER LOGIC
                   final filteredGroups = groups.where((doc) {
                     final data =
                         doc.data() as Map<String, dynamic>;
@@ -108,110 +106,144 @@ class _TeacherHomeState extends State<TeacherHome> {
                       final data =
                           doc.data() as Map<String, dynamic>;
 
-                      return Card(
-                        margin: const EdgeInsets.all(10),
-                        child: Padding(
-                          padding:
-                              const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                data['projectTitle'] ??
-                                    '',
-                                style:
-                                    const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight:
-                                      FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                "${data['className']} - ${data['section']}",
-                              ),
-                              const SizedBox(
-                                  height: 10),
+                      return Stack(
+                        children: [
 
-                              // ✅ Progress Bar
-                              ProjectProgressWidget(
-                                groupId: doc.id,
-                              ),
-
-                              const SizedBox(
-                                  height: 10),
-
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
+                          Card(
+                            margin: const EdgeInsets.all(10),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                 children: [
-                                  _smallButton(
-                                    text:
-                                        "Students Details",
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              GroupDetailPage(
-                                            groupId:
-                                                doc.id,
-                                          ),
-                                        ),
-                                      );
-                                    },
+
+                                  Text(
+                                    data['projectTitle'] ?? '',
+                                    style:
+                                        const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight:
+                                          FontWeight.bold,
+                                    ),
                                   ),
-                                  _smallButton(
-                                    text: "Submission",
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              GuideSubmissionFilesPage(
-                                            groupId:
-                                                doc.id,
-                                          ),
-                                        ),
-                                      );
-                                    },
+
+                                  Text(
+                                    "${data['className']} - ${data['section']}",
                                   ),
-                                  _smallButton(
-                                    text:
-                                        "Marks Evaluation",
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              MarksEvaluationPage(
-                                            groupId:
-                                                doc.id,
-                                          ),
-                                        ),
-                                      );
-                                    },
+
+                                  const SizedBox(height: 10),
+
+                                  ProjectProgressWidget(
+                                    groupId: doc.id,
                                   ),
-                                  _smallButton(
-                                    text: "Marksheet",
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              MarksheetPage(
-                                            groupId:
-                                                doc.id,
-                                          ),
-                                        ),
-                                      );
-                                    },
+
+                                  const SizedBox(height: 10),
+
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      _smallButton(
+                                        text: "Students Details",
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  GroupDetailPage(
+                                                groupId: doc.id,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      _smallButton(
+                                        text: "Submission",
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  GuideSubmissionFilesPage(
+                                                groupId: doc.id,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      _smallButton(
+                                        text: "Marks Evaluation",
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  MarksEvaluationPage(
+                                                groupId: doc.id,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      _smallButton(
+                                        text: "Marksheet",
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  MarksheetPage(
+                                                groupId: doc.id,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+
+                          /// ✅ SAFE GREEN TICK FIX
+                          StreamBuilder<DocumentSnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('groups')
+                                .doc(doc.id)
+                                .snapshots(),
+                            builder: (context, snap) {
+
+                              if (!snap.hasData ||
+                                  !snap.data!.exists) {
+                                return const SizedBox();
+                              }
+
+                              final data =
+                                  snap.data!.data()
+                                      as Map<String, dynamic>?;
+
+                              bool isApproved =
+                                  data?['approved'] == true;
+
+                              if (!isApproved) {
+                                return const SizedBox();
+                              }
+
+                              return const Positioned(
+                                top: 5,
+                                right: 5,
+                                child: Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 28,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       );
                     },
                   );

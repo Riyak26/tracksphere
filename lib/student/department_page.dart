@@ -135,30 +135,97 @@ class DepartmentPage extends StatelessWidget {
         ),
         actions: [
           PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == 'marksheet') {
-                String groupId = await getStudentGroupId();
-                if (groupId.isNotEmpty) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MarksheetPage(groupId: groupId),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Marks not available yet.")),
-                  );
-                }
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: 'marksheet',
-                child: Text('View Marksheet'),
+  onSelected: (value) async {
+    String groupId = await getStudentGroupId();
+
+    if (value == 'marksheet') {
+      if (groupId.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                MarksheetPage(groupId: groupId),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Marks not available yet.")),
+        );
+      }
+    }
+
+    /// ✅ APPROVAL ADDED HERE
+    if (value == 'approval') {
+      if (groupId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("You are not enrolled in any group.")),
+        );
+        return;
+      }
+
+      final doc = await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(groupId)
+          .get();
+
+      bool isApproved = false;
+
+      if (doc.exists) {
+        isApproved = doc.data()?['approved'] ?? false;
+      }
+
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Approval Status"),
+          content: Row(
+            children: [
+              Icon(
+                isApproved
+                    ? Icons.check_circle
+                    : Icons.cancel,
+                color:
+                    isApproved ? Colors.green : Colors.red,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                isApproved
+                    ? "Approved"
+                    : "Not Approved Yet",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isApproved
+                      ? Colors.green
+                      : Colors.red,
+                ),
               ),
             ],
-          )
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context),
+              child: const Text("OK"),
+            )
+          ],
+        ),
+      );
+    }
+  },
+  itemBuilder: (context) => const [
+    PopupMenuItem(
+      value: 'marksheet',
+      child: Text('View Marksheet'),
+    ),
+    PopupMenuItem(
+      value: 'approval',
+      child: Text('View Approval'),
+    ),
+  ],
+)
         ],
       ),
       body: Padding(

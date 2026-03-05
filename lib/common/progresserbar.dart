@@ -4,12 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ProjectProgressWidget extends StatelessWidget {
   final String groupId;
 
+  // Fixed to 5 documents only
+  static const int totalRequiredDocs = 5;
+
   const ProjectProgressWidget({
     super.key,
     required this.groupId,
   });
-
-  final int totalRequiredDocs = 5; // 🔥 CHANGED FROM 6 TO 5
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +20,7 @@ class ProjectProgressWidget extends StatelessWidget {
           .where('groupId', isEqualTo: groupId)
           .snapshots(),
       builder: (context, snapshot) {
+
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
             padding: EdgeInsets.all(12),
@@ -30,10 +32,16 @@ class ProjectProgressWidget extends StatelessWidget {
           return const Text("Error loading progress");
         }
 
+        // Count uploaded PDFs
         int uploadedDocs = snapshot.data?.docs.length ?? 0;
 
-        double progress =
-            (uploadedDocs / totalRequiredDocs).clamp(0.0, 1.0);
+        // Limit max to 5
+        if (uploadedDocs > totalRequiredDocs) {
+          uploadedDocs = totalRequiredDocs;
+        }
+
+        // Calculate progress out of 5
+        double progress = uploadedDocs / totalRequiredDocs;
 
         int percent = (progress * 100).toInt();
 
@@ -53,6 +61,7 @@ class ProjectProgressWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               const Text(
                 "Project Progress",
                 style: TextStyle(
@@ -60,26 +69,23 @@ class ProjectProgressWidget extends StatelessWidget {
                   fontSize: 16,
                 ),
               ),
+
               const SizedBox(height: 12),
+
               LinearProgressIndicator(
                 value: progress,
                 minHeight: 8,
                 backgroundColor: Colors.grey.shade300,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  percent == 100
-                      ? const Color.fromARGB(255, 75, 128, 77)
-                      : const Color.fromARGB(255, 88, 146, 96),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  Color.fromARGB(255, 88, 146, 96),
                 ),
               ),
+
               const SizedBox(height: 8),
 
-              // ✅ NOW SHOWS 0/5, 1/5, etc.
               Text(
-                "$uploadedDocs/$totalRequiredDocs",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+                "$uploadedDocs of $totalRequiredDocs uploaded ($percent%)",
+                style: const TextStyle(fontSize: 13),
               ),
             ],
           ),

@@ -4,6 +4,8 @@ import 'hod_files_page.dart';
 import 'hod_submission_page.dart';
 import 'hod_marksheet_page.dart';
 import 'hod_auth_page.dart';
+import 'package:demo/HOD/department_report_page.dart';
+import 'package:demo/common/progresserbar.dart';
 
 class HodDashboard extends StatefulWidget {
   const HodDashboard({super.key});
@@ -33,12 +35,38 @@ class _HodDashboardState extends State<HodDashboard> {
             );
           },
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      DepartmentReportPage(departmentClass: value),
+                ),
+              );
+            },
+            itemBuilder: (BuildContext context) => const [
+              PopupMenuItem(
+                value: "Information Technology",
+                child: Text("Information Technology"),
+              ),
+              PopupMenuItem(
+                value: "Computer Engineering",
+                child: Text("Computer Engineering"),
+              ),
+              PopupMenuItem(
+                value:
+                    "Electronic & Telecommunication Engineering",
+                child: Text(
+                    "Electronic & Telecommunication Engineering"),
+              ),
+            ],
+          ),
+        ],
       ),
-
       body: Column(
         children: [
-
-          // ✅ SEARCH BAR ADDED HERE
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
@@ -59,8 +87,6 @@ class _HodDashboardState extends State<HodDashboard> {
               ),
             ),
           ),
-
-          // ✅ GROUP LIST
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -82,7 +108,6 @@ class _HodDashboardState extends State<HodDashboard> {
 
                 final groups = snapshot.data!.docs;
 
-                // ✅ FILTER GROUPS BASED ON SEARCH
                 final filteredGroups = groups.where((doc) {
                   final data =
                       doc.data() as Map<String, dynamic>;
@@ -90,7 +115,6 @@ class _HodDashboardState extends State<HodDashboard> {
                       (data['projectTitle'] ?? "")
                           .toString()
                           .toLowerCase();
-
                   return title.contains(searchText);
                 }).toList();
 
@@ -114,6 +138,9 @@ class _HodDashboardState extends State<HodDashboard> {
                         data['className'] ?? "";
                     final section =
                         data['section'] ?? "";
+
+                    bool isApproved =
+                        data['approved'] ?? false;
 
                     return Card(
                       margin: const EdgeInsets.all(12),
@@ -151,75 +178,127 @@ class _HodDashboardState extends State<HodDashboard> {
                                       FontWeight.w600),
                             ),
                             const SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(
-                                      10),
-                              child:
-                                  LinearProgressIndicator(
-                                value: 0.16,
-                                minHeight: 8,
-                                backgroundColor:
-                                    Colors.grey
-                                        .shade300,
-                              ),
+
+                            /// ✅ FIXED: Dynamic Progress Bar
+                            ProjectProgressWidget(
+                              groupId: groupId,
                             ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              "1 of 6 uploaded (16%)",
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey),
-                            ),
+
                             const SizedBox(height: 15),
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment
-                                      .spaceBetween,
-                              children: [
-                                _actionButton(
-                                    context,
-                                    "Students Details",
-                                    () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          HodFilesPage(
-                                              groupId:
-                                                  groupId),
+
+                            SingleChildScrollView(
+                              scrollDirection:
+                                  Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  _actionButton(
+                                      context,
+                                      "Students Details",
+                                      () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            HodFilesPage(
+                                                groupId:
+                                                    groupId),
+                                      ),
+                                    );
+                                  }),
+                                  const SizedBox(width: 8),
+                                  _actionButton(
+                                      context,
+                                      "Submission",
+                                      () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            HodSubmissionPage(
+                                                groupId:
+                                                    groupId),
+                                      ),
+                                    );
+                                  }),
+                                  const SizedBox(width: 8),
+                                  _actionButton(
+                                      context,
+                                      "Marksheet",
+                                      () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            HodMarksheetPage(
+                                                groupId:
+                                                    groupId),
+                                      ),
+                                    );
+                                  }),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: () async {
+                                      await FirebaseFirestore
+                                          .instance
+                                          .collection(
+                                              'groups')
+                                          .doc(groupId)
+                                          .update({
+                                        'approved':
+                                            !isApproved,
+                                      });
+                                    },
+                                    icon: Icon(
+                                      isApproved
+                                          ? Icons.check
+                                          : Icons
+                                              .verified_outlined,
+                                      size: 16,
+                                      color: isApproved
+                                          ? Colors.white
+                                          : Colors.black,
                                     ),
-                                  );
-                                }),
-                                _actionButton(
-                                    context,
-                                    "Submission",
-                                    () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          HodSubmissionPage(
-                                              groupId:
-                                                  groupId),
+                                    label: Text(
+                                      isApproved
+                                          ? "Approved"
+                                          : "Approve",
+                                      style: TextStyle(
+                                        color: isApproved
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
                                     ),
-                                  );
-                                }),
-                                _actionButton(
-                                    context,
-                                    "Marksheet",
-                                    () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          HodMarksheetPage(
-                                              groupId:
-                                                  groupId),
+                                    style:
+                                        ElevatedButton
+                                            .styleFrom(
+                                      backgroundColor:
+                                          isApproved
+                                              ? Colors
+                                                  .green
+                                              : Colors
+                                                  .white,
+                                      side:
+                                          const BorderSide(
+                                              color: Colors
+                                                  .grey),
+                                      padding:
+                                          const EdgeInsets
+                                              .symmetric(
+                                                  horizontal:
+                                                      10,
+                                                  vertical:
+                                                      8),
+                                      shape:
+                                          RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius
+                                                .circular(
+                                                    20),
+                                      ),
                                     ),
-                                  );
-                                }),
-                              ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -245,8 +324,7 @@ class _HodDashboardState extends State<HodDashboard> {
         padding: const EdgeInsets.symmetric(
             horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20),
         ),
       ),
       child: Text(title),
