@@ -33,15 +33,57 @@ class _TeacherHomeState extends State<TeacherHome> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: const Color(0xFFF5F5F5),
+
         appBar: AppBar(
-          title: const Text("Guide"),
-          centerTitle: true,
+          elevation: 0,
+          backgroundColor: const Color(0xFFF5F5F5),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const FirstPage()),
+                (route) => false,
+              );
+            },
+          ),
+          title: const Text(
+            "TrackSphere",
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
+
         body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                "Guide Dashboard",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                "Manage student projects and evaluations",
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
                 controller: _searchController,
                 onChanged: (value) {
@@ -50,16 +92,33 @@ class _TeacherHomeState extends State<TeacherHome> {
                   });
                 },
                 decoration: InputDecoration(
-                  hintText: "Search by Project Title...",
+                  hintText: "Search projects...",
                   prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide.none,
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 0),
                 ),
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                "ACTIVE PROJECTS",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
 
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -109,106 +168,131 @@ class _TeacherHomeState extends State<TeacherHome> {
                       return Stack(
                         children: [
 
-                          Card(
-                            margin: const EdgeInsets.all(10),
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
+                          Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                                  BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black
+                                      .withOpacity(0.05),
+                                  blurRadius: 8,
+                                )
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
 
-                                  Text(
-                                    data['projectTitle'] ?? '',
-                                    style:
-                                        const TextStyle(
-                                      fontSize: 16,
+                                Text(
+                                  data['projectTitle'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight:
+                                        FontWeight.bold,
+                                  ),
+                                ),
+
+                                Text(
+                                  "${data['className']} - ${data['section']}",
+                                  style: const TextStyle(
+                                      color: Colors.grey),
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                const Text(
+                                  "Project Progress",
+                                  style: TextStyle(
                                       fontWeight:
-                                          FontWeight.bold,
+                                          FontWeight.w600),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                ProjectProgressWidget(
+                                  groupId: doc.id,
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    _smallButton(
+                                      text:
+                                          "Students Details",
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                GroupDetailPage(
+                                              groupId:
+                                                  doc.id,
+                                            ),
+                                          ),
+                                        );
+                                      },
                                     ),
-                                  ),
-
-                                  Text(
-                                    "${data['className']} - ${data['section']}",
-                                  ),
-
-                                  const SizedBox(height: 10),
-
-                                  ProjectProgressWidget(
-                                    groupId: doc.id,
-                                  ),
-
-                                  const SizedBox(height: 10),
-
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      _smallButton(
-                                        text: "Students Details",
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  GroupDetailPage(
-                                                groupId: doc.id,
-                                              ),
+                                    _smallButton(
+                                      text: "Submission",
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                GuideSubmissionFilesPage(
+                                              groupId:
+                                                  doc.id,
                                             ),
-                                          );
-                                        },
-                                      ),
-                                      _smallButton(
-                                        text: "Submission",
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  GuideSubmissionFilesPage(
-                                                groupId: doc.id,
-                                              ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    _smallButton(
+                                      text:
+                                          "Marks Evaluation",
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                MarksEvaluationPage(
+                                              groupId:
+                                                  doc.id,
                                             ),
-                                          );
-                                        },
-                                      ),
-                                      _smallButton(
-                                        text: "Marks Evaluation",
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  MarksEvaluationPage(
-                                                groupId: doc.id,
-                                              ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    _smallButton(
+                                      text: "Marksheet",
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                MarksheetPage(
+                                              groupId:
+                                                  doc.id,
                                             ),
-                                          );
-                                        },
-                                      ),
-                                      _smallButton(
-                                        text: "Marksheet",
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  MarksheetPage(
-                                                groupId: doc.id,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
 
-                          /// ✅ SAFE GREEN TICK FIX
                           StreamBuilder<DocumentSnapshot>(
                             stream: FirebaseFirestore.instance
                                 .collection('groups')
@@ -233,8 +317,8 @@ class _TeacherHomeState extends State<TeacherHome> {
                               }
 
                               return const Positioned(
-                                top: 5,
-                                right: 5,
+                                top: 10,
+                                right: 20,
                                 child: Icon(
                                   Icons.check_circle,
                                   color: Colors.green,
@@ -265,12 +349,17 @@ class _TeacherHomeState extends State<TeacherHome> {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12),
+          backgroundColor: const Color(0xFF2F6F4E),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 12),
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.white,
+          ),
           textAlign: TextAlign.center,
         ),
       ),

@@ -108,7 +108,6 @@ class _EnrollGroupPageState extends State<EnrollGroupPage> {
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // ✅ FIXED PART (ONLY THIS WAS CHANGED)
       await FirebaseFirestore.instance
           .collection('students')
           .doc(user.uid)
@@ -116,8 +115,6 @@ class _EnrollGroupPageState extends State<EnrollGroupPage> {
         'email': user.email,
         'groupId': docRef.id,
       }, SetOptions(merge: true));
-
-      print("✅ Student groupId saved: ${docRef.id}");
 
       setState(() {
         groupId = docRef.id;
@@ -134,156 +131,353 @@ class _EnrollGroupPageState extends State<EnrollGroupPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Enroll Your Group'),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) async {
-              if (value == 'logout') {
-                await FirebaseAuth.instance.signOut();
-
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const FirstPage(),
-                  ),
-                  (route) => false,
-                );
-              }
-
-              if (groupId == null && value != 'logout') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Submit group first')),
-                );
-                return;
-              }
-
-              if (value == 'Marksheet') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const StudentGroupListPage(),
-                  ),
-                );
-              } else if (value != 'logout') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DocumentStatusPage(
-                      groupId: groupId!,
-                      documentType: value,
-                    ),
-                  ),
-                );
-              }
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'Abstract', child: Text('Abstract')),
-              PopupMenuItem(value: 'Synopsis', child: Text('Synopsis')),
-              PopupMenuItem(value: 'Survey', child: Text('Survey')),
-              PopupMenuItem(value: 'PPT', child: Text('PPT')),
-              PopupMenuItem(value: 'Blackbook', child: Text('Blackbook')),
-              PopupMenuItem(value: 'logout', child: Text('Logout')),
-            ],
-          )
-        ],
+  InputDecoration fieldStyle(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.grey.shade100,
+      contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey.shade300),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+    );
+  }
+
+  Widget memberCard(int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          Row(
             children: [
+              if (index == 0)
+                const Icon(Icons.circle,
+                    color: Colors.green, size: 10),
+
+              const SizedBox(width: 8),
+
               Text(
-                '${widget.className} - ${widget.section}',
+                index == 0
+                    ? "Member 1"
+                    : "Member ${index + 1}",
                 style: const TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Select No. of Members',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Wrap(
-                spacing: 8,
-                children: List.generate(5, (i) {
-                  final count = i + 1;
-                  return ChoiceChip(
-                    label: Text('$count'),
-                    selected: selectedMembers == count,
-                    onSelected: (_) {
-                      setState(() {
-                        selectedMembers = count;
-                        _initMemberControllers(count);
-                      });
-                    },
-                  );
-                }),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: projectTitleController,
-                decoration: const InputDecoration(
-                  labelText: 'Project Title',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: domainController,
-                decoration: const InputDecoration(
-                  labelText: 'Domain',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Team Members',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Column(
-                children: List.generate(selectedMembers, (index) {
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: nameControllers[index],
-                            decoration: InputDecoration(
-                              labelText:
-                                  'Member ${index + 1} Name',
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          TextField(
-                            controller: rollControllers[index],
-                            decoration: InputDecoration(
-                              labelText:
-                                  'Member ${index + 1} Roll No',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: submitGroup,
-                  child: const Text('Submit Group'),
-                ),
+                    fontWeight: FontWeight.bold),
               ),
             ],
           ),
+
+          const SizedBox(height: 12),
+
+          TextField(
+            controller: nameControllers[index],
+            decoration:
+                fieldStyle(index == 0 ? "Member Name" : "Member Name"),
+          ),
+
+          const SizedBox(height: 10),
+
+          TextField(
+            controller: rollControllers[index],
+            decoration: fieldStyle("Roll No"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget memberSelector() {
+    List<int> counts = [2, 3, 4];
+
+    return Row(
+      children: counts.map((count) {
+        bool selected = selectedMembers == count;
+
+        return Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedMembers = count;
+                _initMemberControllers(count);
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: selected
+                    ? const Color(0xff4c7a67)
+                    : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                "$count Members",
+                style: TextStyle(
+                  color: selected
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      appBar: AppBar(
+        title: const Text(
+          'Enroll Your Group',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.black),
+
+       actions: [
+  PopupMenuButton<String>(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(15),
+    ),
+    onSelected: (value) async {
+
+      if (value == 'logout') {
+        await FirebaseAuth.instance.signOut();
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const FirstPage(),
+          ),
+          (route) => false,
+        );
+      }
+
+      if (groupId == null && value != 'logout') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Submit group first')),
+        );
+        return;
+      }
+
+      if (value == 'Marksheet') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const StudentGroupListPage(),
+          ),
+        );
+      } else if (value != 'logout') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DocumentStatusPage(
+              groupId: groupId!,
+              documentType: value,
+            ),
+          ),
+        );
+      }
+    },
+
+    itemBuilder: (context) => [
+
+      const PopupMenuItem(
+        value: 'Abstract',
+        child: Row(
+          children: [
+            Icon(Icons.description, color: Colors.green),
+            SizedBox(width: 10),
+            Text("Abstract"),
+          ],
+        ),
+      ),
+
+      const PopupMenuItem(
+        value: 'Synopsis',
+        child: Row(
+          children: [
+            Icon(Icons.grid_view, color: Colors.green),
+            SizedBox(width: 10),
+            Text("Synopsis"),
+          ],
+        ),
+      ),
+
+      const PopupMenuItem(
+        value: 'Survey',
+        child: Row(
+          children: [
+            Icon(Icons.bar_chart, color: Colors.green),
+            SizedBox(width: 10),
+            Text("Survey"),
+          ],
+        ),
+      ),
+
+      const PopupMenuItem(
+        value: 'PPT',
+        child: Row(
+          children: [
+            Icon(Icons.play_arrow, color: Colors.green),
+            SizedBox(width: 10),
+            Text("PPT"),
+          ],
+        ),
+      ),
+
+      const PopupMenuItem(
+        value: 'Blackbook',
+        child: Row(
+          children: [
+            Icon(Icons.menu_book, color: Colors.green),
+            SizedBox(width: 10),
+            Text("Blackbook"),
+          ],
+        ),
+      ),
+
+      const PopupMenuDivider(),
+
+      const PopupMenuItem(
+        value: 'logout',
+        child: Row(
+          children: [
+            Icon(Icons.logout, color: Colors.red),
+            SizedBox(width: 10),
+            Text(
+              "Logout",
+              style: TextStyle(color: Colors.red),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+],
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            Center(
+              child: Column(
+                children: [
+                  const Text(
+                    "DEPARTMENT",
+                    style: TextStyle(
+                        color: Colors.grey,
+                        letterSpacing: 2),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${widget.className} - ${widget.section}",
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            const Text(
+              "Select No. of Members",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 10),
+
+            memberSelector(),
+
+            const SizedBox(height: 22),
+
+            const Text("Project Title",
+                style: TextStyle(fontWeight: FontWeight.w600)),
+
+            const SizedBox(height: 8),
+
+            TextField(
+              controller: projectTitleController,
+              decoration: fieldStyle("Enter project name"),
+            ),
+
+            const SizedBox(height: 16),
+
+            const Text("Project Domain",
+                style: TextStyle(fontWeight: FontWeight.w600)),
+
+            const SizedBox(height: 8),
+
+            TextField(
+              controller: domainController,
+              decoration:
+                  fieldStyle("e.g. AI, Web Development"),
+            ),
+
+            const SizedBox(height: 24),
+
+            Column(
+              children: List.generate(
+                  selectedMembers, (index) => memberCard(index)),
+            ),
+
+            const SizedBox(height: 20),
+
+            GestureDetector(
+              onTap: submitGroup,
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xff4c7a67),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Submit Group Enrollment",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            const Center(
+              child: Text(
+                "By enrolling, you agree to the project guidelines.",
+                style: TextStyle(
+                    color: Colors.grey, fontSize: 12),
+              ),
+            )
+          ],
         ),
       ),
     );

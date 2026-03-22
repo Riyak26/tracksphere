@@ -19,6 +19,7 @@ class _StudentLoginState extends State<StudentLogin> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool showResetField = false;
+  bool obscurePassword = true;
 
   Future<void> login() async {
     if (emailController.text.trim().isEmpty ||
@@ -49,6 +50,7 @@ class _StudentLoginState extends State<StudentLogin> {
   }
 
   Future<void> changePassword() async {
+
     if (emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Enter email")),
@@ -58,7 +60,7 @@ class _StudentLoginState extends State<StudentLogin> {
 
     if (passController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter current password")),
+        const SnackBar(content: Text("Enter old password")),
       );
       return;
     }
@@ -79,16 +81,23 @@ class _StudentLoginState extends State<StudentLogin> {
     }
 
     try {
-      // Re-login to verify current password
-      UserCredential credential =
+
+      UserCredential userCredential =
           await _auth.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passController.text.trim(),
       );
 
-      User? user = credential.user;
+      User? user = userCredential.user;
 
-      await user!.updatePassword(newPassController.text.trim());
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: emailController.text.trim(),
+        password: passController.text.trim(),
+      );
+
+      await user!.reauthenticateWithCredential(credential);
+
+      await user.updatePassword(newPassController.text.trim());
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Password changed successfully")),
@@ -101,7 +110,7 @@ class _StudentLoginState extends State<StudentLogin> {
 
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? "Error occurred")),
+        SnackBar(content: Text(e.message ?? "Password change failed")),
       );
     }
   }
@@ -118,67 +127,208 @@ class _StudentLoginState extends State<StudentLogin> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: const Color(0xFFF3F4F6),
         appBar: AppBar(
-          title: const Text("Student Login"),
+          elevation: 0,
+          backgroundColor: const Color(0xFFF3F4F6),
+          foregroundColor: Colors.black,
+          title: const Text("TrackSphere"),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(hintText: "Email"),
+        body: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 10,
+                    color: Colors.black.withOpacity(0.08),
+                    offset: const Offset(0, 4),
+                  )
+                ],
               ),
-              TextField(
-                controller: passController,
-                obscureText: true,
-                decoration: const InputDecoration(hintText: "Password"),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  const Text(
+                    "Student Login",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  const Text(
+                    "Access your personalized learning dashboard.",
+                    style: TextStyle(
+                      color: Colors.black54,
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  const Text(
+                    "Email Address",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      hintText: "e.g. student@gmail.com",
+                      filled: true,
+                      fillColor: const Color(0xFFF5F5F5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    "Password",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  TextField(
+                    controller: passController,
+                    obscureText: obscurePassword,
+                    decoration: InputDecoration(
+                      hintText: "Enter your password",
+                      filled: true,
+                      fillColor: const Color(0xFFF5F5F5),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            obscurePassword = !obscurePassword;
+                          });
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        setState(() {
+                          showResetField = !showResetField;
+                        });
+                      },
+                      child: const Text(
+                        "Forgot password?",
+                        style: TextStyle(color: Colors.green),
+                      ),
+                    ),
+                  ),
+
+                  if (showResetField) ...[
+                    const SizedBox(height: 10),
+
+                    const Text(
+                      "New Password",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    TextField(
+                      controller: newPassController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: "Enter New Password",
+                        filled: true,
+                        fillColor: const Color(0xFFF5F5F5),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: changePassword,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          minimumSize: const Size(double.infinity, 45),
+                        ),
+                        child: const Text("Save New Password"),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4F7C65),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        "Login to Portal",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Center(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => StudentRegister(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "No account? Register",
+                        style: TextStyle(color: Colors.green),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    setState(() {
-                      showResetField = true;
-                    });
-                  },
-                  child: const Text("Forgot Password?"),
-                ),
-              ),
-
-              if (showResetField) ...[
-                TextField(
-                  controller: newPassController,
-                  obscureText: true,
-                  decoration:
-                      const InputDecoration(hintText: "Enter New Password"),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: changePassword,
-                  child: const Text("Save New Password"),
-                ),
-              ],
-
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                onPressed: login,
-                child: const Text("Login"),
-              ),
-
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => StudentRegister()),
-                  );
-                },
-                child: const Text("New Student? Register"),
-              ),
-            ],
+            ),
           ),
         ),
       ),

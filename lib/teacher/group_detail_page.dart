@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'marks_evaluation_page.dart';
-import 'marksheet_page.dart';
 
 class GroupDetailPage extends StatelessWidget {
   final String groupId;
@@ -47,41 +45,11 @@ class GroupDetailPage extends StatelessWidget {
     Navigator.pop(context);
   }
 
-  /// 🔥 THIS CREATES THE marks COLLECTION (FIRST TIME)
-  Future<void> _createMarksCollection(BuildContext context) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('marks')
-          .doc(groupId)
-          .set({
-        'review1': 0,
-        'review2': 0,
-        'final': 0,
-        'total': 0,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Marks collection created')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Group Details"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => _deleteGroup(context),
-          ),
-        ],
+        title: const Text("TrackSphere"),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -89,6 +57,7 @@ class GroupDetailPage extends StatelessWidget {
             .doc(groupId)
             .snapshots(),
         builder: (context, snapshot) {
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -105,73 +74,70 @@ class GroupDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  data['projectTitle'] ?? '',
-                  style: const TextStyle(
+
+                /// GROUP DETAILS TITLE
+                const Text(
+                  "Group Details",
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text("Domain: ${data['domain'] ?? '-'}"),
-                Text(
-                  "Class: ${data['className']} - ${data['section']}",
-                ),
-                Text("Members: ${members.length}"),
-
-                const SizedBox(height: 20),
-
-                /// 🔹 CREATE MARKS COLLECTION (ONE TIME)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                    ),
-                    onPressed: () => _createMarksCollection(context),
-                    child: const Text("CREATE MARKS COLLECTION"),
                   ),
                 ),
 
                 const SizedBox(height: 10),
 
-                /// 🔹 MARKS BUTTONS
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  MarksEvaluationPage(groupId: groupId),
+                /// GROUP CARD
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Stack(
+                      children: [
+
+                        /// DELETE ICON
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteGroup(context),
+                          ),
+                        ),
+
+                        /// GROUP INFO
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              data['projectTitle'] ?? '',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          );
-                        },
-                        child: const Text("Marks Evaluation"),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  MarksheetPage(groupId: groupId),
+
+                            const SizedBox(height: 8),
+
+                            Text("Domain: ${data['domain'] ?? '-'}"),
+
+                            Text(
+                              "Class: ${data['className']} - ${data['section']}",
                             ),
-                          );
-                        },
-                        child: const Text("Marksheet"),
-                      ),
+
+                            Text("Members: ${members.length}"),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
 
                 const SizedBox(height: 25),
 
+                /// STUDENT DETAILS TITLE
                 const Text(
                   "Student Details",
                   style: TextStyle(
@@ -179,8 +145,10 @@ class GroupDetailPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 10),
 
+                /// STUDENT LIST
                 members.isEmpty
                     ? const Text("No students added")
                     : Column(
@@ -191,6 +159,10 @@ class GroupDetailPage extends StatelessWidget {
                               title: Text(m['name'] ?? ''),
                               subtitle: Text(
                                 "Roll No: ${m['rollNo'] ?? '-'}",
+                              ),
+                              trailing: const Text(
+                                "Member",
+                                style: TextStyle(color: Colors.grey),
                               ),
                             ),
                           );

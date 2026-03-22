@@ -1,271 +1,380 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:demo/student/student_login.dart';
 import 'teacher/teacher_login.dart';
 import 'HOD/hod_auth_page.dart';
+import 'about_page.dart';
+import 'contact_page.dart';
+import 'help_page.dart';
 
-class FirstPage extends StatelessWidget {
+class FirstPage extends StatefulWidget {
   const FirstPage({super.key});
 
   @override
+  State<FirstPage> createState() => _FirstPageState();
+}
+
+class _FirstPageState extends State<FirstPage> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
-      body: SafeArea(
-        child: Stack(
-          children: [
+      body: Stack(
+        children: [
 
-            /// ================= MAIN CONTENT =================
-            SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+          /// BACKGROUND IMAGE
+          Container(
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/bg.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
 
-                    const SizedBox(height: 20),
+          /// BLUR
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+            child: Container(
+              color: Colors.white.withOpacity(0.18),
+            ),
+          ),
 
-                    /// ================= TOP NAV =================
-                    Row(
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+
+                  /// ================= NAVBAR =================
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
 
-                        /// LEFT SIDE
-                        Column(
+                        /// LOGO
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
 
-                            Row(
-                              children: const [
-                                Text(
-                                  "TrackSphere",
-                                  style: TextStyle(
-                                    fontSize: 20, // reduced
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1F2B70),
-                                  ),
-                                ),
-                                SizedBox(width: 6),
-                                Icon(Icons.track_changes,
-                                    size: 18,
-                                    color: Color(0xFF1F2B70)),
-                              ],
+                            /// moved slightly upward
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: const Icon(
+                                Icons.track_changes,
+                                color: Colors.teal,
+                                size: 28,
+                              ),
                             ),
 
-                           const SizedBox(height: 6),
+                            const SizedBox(width: 6),
 
-Row(
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
 
-    /// BIG VP
-    const Text(
-      "VP",
-      style: TextStyle(
-        fontSize: 26,              // adjust size here
-        fontWeight: FontWeight.w900,
-        color: Colors.green,
-        letterSpacing: 1.5,
-      ),
-    ),
+                                const Text(
+                                  "TrackSphere",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
 
-    const SizedBox(width: 8),
+                                Row(
+                                  children: [
 
-    /// VERTICAL LINE
-    Container(
-      height: 28,
-      width: 2,
-      color: Colors.green,
-    ),
+                                    const Text(
+                                      "VP",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                      ),
+                                    ),
 
-    const SizedBox(width: 8),
+                                    const SizedBox(width: 6),
 
-    /// TEXT
-    const Text(
-      "Vidyalankar\nPolytechnic",
-      style: TextStyle(
-        fontSize: 11,
-        height: 1.2,
-        fontWeight: FontWeight.w600,
-        color: Colors.green,
-      ),
-    ),
-  ],
-),
+                                    Container(
+                                      height: 25,
+                                      width: 1.5,
+                                      color: Colors.green,
+                                    ),
+
+                                    const SizedBox(width: 6),
+
+                                    const Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text("Vidyalankar",
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.green)),
+                                        Text("Polytechnic",
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.green)),
+                                      ],
+                                    )
+                                  ],
+                                )
+                              ],
+                            )
                           ],
                         ),
 
-                        /// RIGHT SIDE
+                        /// MENU
                         Row(
                           children: [
 
-                            const Text(
-                              "Home",
-                              style: TextStyle(fontSize: 14),
+                            const Text("Home"),
+                            const SizedBox(width: 15),
+
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const AboutPage()),
+                                );
+                              },
+                              child: const Text("About"),
                             ),
 
-                            const SizedBox(width: 20),
+                            const SizedBox(width: 15),
 
-                            Tooltip(
-                              message:
-                                  "This application helps Students, Guides, and HODs manage project submissions and tracking.",
-                              decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 154, 198, 235),
-                                borderRadius: BorderRadius.circular(8),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const ContactPage()),
+                                );
+                              },
+                              child: const Text("Contact"),
+                            ),
+
+                            const SizedBox(width: 15),
+
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const HelpPage()),
+                                );
+                              },
+                              child: const Text("Help"),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 80),
+
+                  /// ================= MAIN CONTENT =================
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        const Text(
+                          "TrackSphere",
+                          style: TextStyle(
+                            fontSize: 46,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        const Text(
+                          "Project Tracking System",
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: Colors.black54,
+                          ),
+                        ),
+
+                        const SizedBox(height: 25),
+
+                        const Text(
+                          "A streamlined platform for managing academic projects efficiently.",
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.black54,
+                            height: 1.5,
+                          ),
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        /// BUTTONS
+                        Wrap(
+                          spacing: 15,
+                          runSpacing: 15,
+                          children: [
+
+                            SizedBox(
+                              width: 150,
+                              child: _button(
+                                context,
+                                text: "Student Login",
+                                filled: true,
                               ),
-                              textStyle: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
+                            ),
+
+                            SizedBox(
+                              width: 150,
+                              child: _button(
+                                context,
+                                text: "Guide Login",
                               ),
-                              child: const Text(
-                                "About",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF1F2B70),
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            ),
+
+                            SizedBox(
+                              width: 150,
+                              child: _button(
+                                context,
+                                text: "HOD Login",
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 60),
-
-                    /// ================= BIG TITLE (Reduced) =================
-                    const Text(
-                      "TrackSphere",
-                      style: TextStyle(
-                        fontSize: 38, // reduced from 54
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1F2B70),
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    const Text(
-                      "Project Tracking System",
-                      style: TextStyle(
-                        fontSize: 20, // reduced
-                        color: Colors.black87,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    const Text(
-                      "A streamlined platform for managing academic\n"
-                      "projects, submissions, and evaluations.",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
-                        height: 1.5,
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// ================= BUTTONS =================
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: [
-
-                        _button(
-                          context,
-                          text: "Student Login",
-                          filled: true,
-                        ),
-
-                        _button(
-                          context,
-                          text: "Guide Login",
-                        ),
-
-                        _button(
-                          context,
-                          text: "HOD Login",
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              ),
-            ),
-
-            /// ================= FIXED BOTTOM TEXT =================
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                width: double.infinity,
-                color: const Color(0xFFF5F7FB),
-                child: const Text(
-                  "Developed by: Ishita Raje, Arya Khedekar, Sharavani Nirmal, Punita Wadkar",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.black54,
                   ),
-                ),
+
+                  const SizedBox(height: 80),
+
+                  /// FOOTER
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 20),
+                    child: Text(
+                      "PROJECT CREDITS\nDeveloped by: Ishita Raje, Arya Khedekar, Punita Wadkar, Shravani Nirmal",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  )
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  /// ================= BUTTON =================
+  /// BUTTON
   static Widget _button(
     BuildContext context, {
     required String text,
     bool filled = false,
   }) {
-    return InkWell(
+    return _HoverButton(
+      text: text,
+      filled: filled,
       onTap: () {
         if (text == "Student Login") {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => StudentLogin()),
+            MaterialPageRoute(builder: (_) => const StudentLogin()),
           );
         } else if (text == "Guide Login") {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => TeacherLogin()),
+            MaterialPageRoute(builder: (_) => const TeacherLogin()),
           );
         } else if (text == "HOD Login") {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => HodAuthPage()),
+            MaterialPageRoute(builder: (_) => const HodAuthPage()),
           );
         }
       },
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: filled
-              ? const Color(0xFF1F2B70)
-              : Colors.transparent,
+    );
+  }
+}
+
+/// HOVER BUTTON
+class _HoverButton extends StatefulWidget {
+  final String text;
+  final bool filled;
+  final VoidCallback onTap;
+
+  const _HoverButton({
+    required this.text,
+    required this.filled,
+    required this.onTap,
+  });
+
+  @override
+  State<_HoverButton> createState() => _HoverButtonState();
+}
+
+class _HoverButtonState extends State<_HoverButton> {
+
+  bool hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => hovering = true),
+      onExit: (_) => setState(() => hovering = false),
+
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        transform: hovering
+            ? (Matrix4.identity()..translate(0, -5))
+            : Matrix4.identity(),
+
+        child: InkWell(
+          onTap: widget.onTap,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: const Color(0xFF1F2B70),
-            width: 1.3,
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: filled
-                ? Colors.white
-                : const Color(0xFF1F2B70),
+
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+
+            decoration: BoxDecoration(
+              color: widget.filled
+                  ? const Color.fromARGB(255, 4, 70, 61)
+                  : Colors.grey.shade200,
+
+              borderRadius: BorderRadius.circular(10),
+
+              boxShadow: hovering
+                  ? [
+                      const BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 15,
+                        offset: Offset(0, 6),
+                      )
+                    ]
+                  : [
+                      const BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      )
+                    ],
+            ),
+
+            child: Center(
+              child: Text(
+                widget.text,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: widget.filled ? Colors.white : Colors.black87,
+                ),
+              ),
+            ),
           ),
         ),
       ),

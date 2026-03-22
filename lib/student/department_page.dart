@@ -4,29 +4,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'enroll_group_page.dart';
 import '../teacher/marksheet_page.dart';
 
-/// ===============================
-/// 1️⃣ SELECT DEPARTMENT PAGE
-/// (IF6K, CO6K, EJ6K)
-/// ===============================
-
 class SelectDepartmentPage extends StatelessWidget {
   const SelectDepartmentPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: const Color(0xFF12022F),
       appBar: AppBar(
+        backgroundColor: const Color(0xFF12022F),
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        title: const Text(
-          "Department",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text("Department"),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             departmentCard(context, "IF6K"),
@@ -41,8 +32,7 @@ class SelectDepartmentPage extends StatelessWidget {
   }
 
   Widget departmentCard(BuildContext context, String className) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
@@ -52,17 +42,15 @@ class SelectDepartmentPage extends StatelessWidget {
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF1C0B3F),
+              Color(0xFF2D115A),
+            ],
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,26 +58,18 @@ class SelectDepartmentPage extends StatelessWidget {
             Text(
               className,
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white),
           ],
         ),
       ),
     );
   }
 }
-
-/// ===============================
-/// 2️⃣ DEPARTMENT SECTION PAGE
-/// (A, B, C)
-/// ===============================
 
 class DepartmentPage extends StatelessWidget {
   final String className;
@@ -114,129 +94,115 @@ class DepartmentPage extends StatelessWidget {
   Future<String> getStudentGroupId() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return '';
+
     final doc = await FirebaseFirestore.instance
         .collection('students')
         .doc(user.uid)
         .get();
+
     return doc.exists ? doc.data()!['groupId'] ?? '' : '';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: Colors.white,
+
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
-          'Department',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          "TrackSphere",
+          style: TextStyle(color: Colors.black),
         ),
         actions: [
           PopupMenuButton<String>(
-  onSelected: (value) async {
-    String groupId = await getStudentGroupId();
+            onSelected: (value) async {
+              String groupId = await getStudentGroupId();
 
-    if (value == 'marksheet') {
-      if (groupId.isNotEmpty) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) =>
-                MarksheetPage(groupId: groupId),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Marks not available yet.")),
-        );
-      }
-    }
+              if (value == 'marksheet') {
+                if (groupId.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MarksheetPage(groupId: groupId),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Marks not available yet.")),
+                  );
+                }
+              }
 
-    /// ✅ APPROVAL ADDED HERE
-    if (value == 'approval') {
-      if (groupId.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("You are not enrolled in any group.")),
-        );
-        return;
-      }
+              if (value == 'approval') {
+                if (groupId.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text("You are not enrolled in any group.")),
+                  );
+                  return;
+                }
 
-      final doc = await FirebaseFirestore.instance
-          .collection('groups')
-          .doc(groupId)
-          .get();
+                final doc = await FirebaseFirestore.instance
+                    .collection('groups')
+                    .doc(groupId)
+                    .get();
 
-      bool isApproved = false;
+                bool isApproved = false;
 
-      if (doc.exists) {
-        isApproved = doc.data()?['approved'] ?? false;
-      }
+                if (doc.exists) {
+                  isApproved = doc.data()?['approved'] ?? false;
+                }
 
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Approval Status"),
-          content: Row(
-            children: [
-              Icon(
-                isApproved
-                    ? Icons.check_circle
-                    : Icons.cancel,
-                color:
-                    isApproved ? Colors.green : Colors.red,
-                size: 28,
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text("Approval Status"),
+                    content: Row(
+                      children: [
+                        Icon(
+                          isApproved ? Icons.check_circle : Icons.cancel,
+                          color: isApproved ? Colors.green : Colors.red,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          isApproved ? "Approved" : "Not Approved Yet",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isApproved ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'marksheet',
+                child: Text('View Marksheet'),
               ),
-              const SizedBox(width: 12),
-              Text(
-                isApproved
-                    ? "Approved"
-                    : "Not Approved Yet",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: isApproved
-                      ? Colors.green
-                      : Colors.red,
-                ),
+              PopupMenuItem(
+                value: 'approval',
+                child: Text('View Approval'),
               ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () =>
-                  Navigator.pop(context),
-              child: const Text("OK"),
-            )
-          ],
-        ),
-      );
-    }
-  },
-  itemBuilder: (context) => const [
-    PopupMenuItem(
-      value: 'marksheet',
-      child: Text('View Marksheet'),
-    ),
-    PopupMenuItem(
-      value: 'approval',
-      child: Text('View Approval'),
-    ),
-  ],
-)
+          )
         ],
       ),
+
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            Text(
-              getDepartmentTitle(),
-              style: const TextStyle(
+            const Text(
+              "Select Section",
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -244,65 +210,74 @@ class DepartmentPage extends StatelessWidget {
 
             const SizedBox(height: 6),
 
-            Text(
-              className,
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.grey.shade600,
-              ),
+            const Text(
+              "Choose your class session",
+              style: TextStyle(color: Colors.grey),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
-            sectionCard(context, 'A'),
+            sectionCard(context, 'A', true),
             const SizedBox(height: 16),
-            sectionCard(context, 'B'),
+            sectionCard(context, 'B', false),
             const SizedBox(height: 16),
-            sectionCard(context, 'C'),
+            sectionCard(context, 'C', false),
           ],
         ),
       ),
     );
   }
 
-  Widget sectionCard(BuildContext context, String section) {
+  Widget sectionCard(BuildContext context, String section, bool active) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          )
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
 
-          Text(
-            '$className $section',
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Text(
+                '$className $section',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
 
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
+              backgroundColor: const Color(0xFF3F7D5E),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
-              elevation: 0,
             ),
             onPressed: () {
               Navigator.push(
@@ -316,10 +291,10 @@ class DepartmentPage extends StatelessWidget {
               );
             },
             child: const Text(
-              'Enroll',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              "Select Section",
+              style: TextStyle(color: Colors.white),
             ),
-          ),
+          )
         ],
       ),
     );

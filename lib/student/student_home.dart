@@ -1,94 +1,92 @@
 import 'package:flutter/material.dart';
 import 'department_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  String selectedDept = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+
+      backgroundColor: const Color(0xFFF3F4F6),
+
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: const Color(0xFFF3F4F6),
+        foregroundColor: Colors.black,
+        title: const Text("Select Department"),
+      ),
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
               const Text(
-                "Select Department",
+                "Choose Your Department",
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
 
               const Text(
-                "Choose your branch to access the project\nmanagement dashboard.",
-                textAlign: TextAlign.center,
+                "Select your specialization to track your progress and schedules.",
                 style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey,
+                  color: Colors.black54,
+                  fontSize: 14,
                 ),
               ),
 
-              const SizedBox(height: 35),
+              const SizedBox(height: 30),
 
               buildDepartmentCard(
                 context,
                 code: "IF6K",
                 name: "Information Technology",
-                icon: Icons.computer,
+                image:
+                    "https://www.shutterstock.com/shutterstock/photos/1055271440/display_1500/stock-photo-personal-computer-in-office-1055271440.jpg",
+                description:
+                    "Focus on software development, cloud computing, and data management systems.",
               ),
 
               buildDepartmentCard(
                 context,
                 code: "CO6K",
                 name: "Computer Engineering",
-                icon: Icons.desktop_windows,
+                image:
+                    "https://p0.piqsels.com/preview/690/183/611/code-coding-connection-css.jpg",
+                description:
+                    "Integration of hardware systems with software protocols and embedded architecture.",
               ),
 
               buildDepartmentCard(
                 context,
                 code: "EJ6K",
-                name: "Electronics & Telecomm.",
-                icon: Icons.memory,
+                name: "Electronic & Telecommunication",
+                image:
+                    "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789",
+                description:
+                    "Study of signal processing, wireless communication, and electronic circuitry.",
               ),
 
-              const SizedBox(height: 60),
+              const SizedBox(height: 40),
 
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF3F7),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.circle, size: 10, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Text(
-                      "AUTHENTICATED AS : STUDENT",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -100,77 +98,126 @@ class HomePage extends StatelessWidget {
     BuildContext context, {
     required String code,
     required String name,
-    required IconData icon,
+    required String image,
+    required String description,
   }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DepartmentPage(
-              className: code,
+
+    bool active = selectedDept == code;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 25),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 10,
+            color: Colors.black.withOpacity(0.08),
+            offset: const Offset(0,4),
+          )
+        ],
+      ),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          /// IMAGE
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(18),
+            ),
+            child: Image.network(
+              image,
+              height: 180,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
           ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 18),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
 
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEAF2FB),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: Colors.blue, size: 26),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(18),
 
-            const SizedBox(width: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    code,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                Text(
+                  "Engineering - $code ($name)",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    height: 1.4,
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                SizedBox(
+                  width: double.infinity,
+
+                  child: ElevatedButton(
+                    onPressed: () {
+
+                      setState(() {
+                        selectedDept = code;
+                      });
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DepartmentPage(
+                            className: code,
+                          ),
+                        ),
+                      );
+                    },
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF477A63),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          "Select",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(width: 6),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                          size: 18,
+                        )
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                )
 
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey,
+              ],
             ),
-          ],
-        ),
+          )
+
+        ],
       ),
     );
   }

@@ -90,18 +90,24 @@ class _MarksEvaluationPageState extends State<MarksEvaluationPage> {
             _buildTable(teamAssessment),
 
             const SizedBox(height: 30),
-
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: submitMarks,
-                child: const Text(
-                  "Submit Marks",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
+SizedBox(
+  width: double.infinity,
+  height: 50,
+  child: ElevatedButton(
+    onPressed: submitMarks,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color.fromARGB(255, 21, 71, 24), // Dark green
+      foregroundColor: Colors.white, // Text color
+    ),
+    child: const Text(
+      "Submit Marks",
+      style: TextStyle(
+        fontSize: 16,
+        color: Colors.white, // Ensures white text
+      ),
+    ),
+  ),
+)
           ],
         ),
       ),
