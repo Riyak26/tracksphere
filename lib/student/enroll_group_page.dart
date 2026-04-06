@@ -67,69 +67,100 @@ class _EnrollGroupPageState extends State<EnrollGroupPage> {
   }
 
   Future<void> submitGroup() async {
-    final user = FirebaseAuth.instance.currentUser;
+  final user = FirebaseAuth.instance.currentUser;
 
-    if (user == null) {
-      print('❌ User not logged in');
-      return;
+  if (user == null) {
+    print('❌ User not logged in');
+    return;
+  }
+
+  if (projectTitleController.text.isEmpty ||
+      domainController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Fill all fields')),
+    );
+    return;
+  }
+
+  final members = List.generate(selectedMembers, (i) {
+    return {
+      'name': nameControllers[i].text.trim(),
+      'rollNo': rollControllers[i].text.trim(),
+    };
+  });
+
+  try {
+    // ✅ FETCH ALL EXISTING GROUPS
+    final snapshot =
+        await FirebaseFirestore.instance.collection('groups').get();
+
+    List<String> existingRolls = [];
+
+    for (var doc in snapshot.docs) {
+      List membersList = doc['members'] ?? [];
+
+      for (var m in membersList) {
+        if (m['rollNo'] != null) {
+          existingRolls.add(m['rollNo'].toString());
+        }
+      }
     }
 
-    if (projectTitleController.text.isEmpty ||
-        domainController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Fill all fields')),
-      );
-      return;
+    // ✅ CHECK DUPLICATE ROLL NO
+    for (var m in members) {
+      if (existingRolls.contains(m['rollNo'])) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '❌ Roll No ${m['rollNo']} already registered'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
     }
 
-    final members = List.generate(selectedMembers, (i) {
-      return {
-        'name': nameControllers[i].text.trim(),
-        'rollNo': rollControllers[i].text.trim(),
-      };
+    // ✅ SAVE GROUP
+    final docRef =
+        FirebaseFirestore.instance.collection('groups').doc();
+
+    await docRef.set({
+      'groupId': docRef.id,
+      'studentUid': user.uid,
+      'studentEmail': user.email,
+      'className': widget.className,
+      'section': widget.section,
+      'projectTitle': projectTitleController.text.trim(),
+      'domain': domainController.text.trim(),
+      'members': members,
+      'membersCount': selectedMembers,
+      'documents': {},
+      'marks': null,
+      'createdAt': FieldValue.serverTimestamp(),
     });
 
-    try {
-      final docRef =
-          FirebaseFirestore.instance.collection('groups').doc();
+    await FirebaseFirestore.instance
+        .collection('students')
+        .doc(user.uid)
+        .set({
+      'email': user.email,
+      'groupId': docRef.id,
+    }, SetOptions(merge: true));
 
-      await docRef.set({
-        'groupId': docRef.id,
-        'studentUid': user.uid,
-        'studentEmail': user.email,
-        'className': widget.className,
-        'section': widget.section,
-        'projectTitle': projectTitleController.text.trim(),
-        'domain': domainController.text.trim(),
-        'members': members,
-        'membersCount': selectedMembers,
-        'documents': {},
-        'marks': null,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+    setState(() {
+      groupId = docRef.id;
+    });
 
-      await FirebaseFirestore.instance
-          .collection('students')
-          .doc(user.uid)
-          .set({
-        'email': user.email,
-        'groupId': docRef.id,
-      }, SetOptions(merge: true));
-
-      setState(() {
-        groupId = docRef.id;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Group submitted successfully')),
-      );
-    } catch (e) {
-      print("❌ Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to save group')),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Group submitted successfully')),
+    );
+  } catch (e) {
+    print("❌ Error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Failed to save group')),
+    );
   }
+}
 
   InputDecoration fieldStyle(String hint) {
     return InputDecoration(

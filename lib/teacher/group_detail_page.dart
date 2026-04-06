@@ -75,7 +75,6 @@ class GroupDetailPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
-                /// GROUP DETAILS TITLE
                 const Text(
                   "Group Details",
                   style: TextStyle(
@@ -97,38 +96,37 @@ class GroupDetailPage extends StatelessWidget {
                     child: Stack(
                       children: [
 
-                        /// DELETE ICON
+                        /// GROUP INFO (added right padding so text doesn't clash)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 40),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data['projectTitle'] ?? '',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text("Domain: ${data['domain'] ?? '-'}"),
+                              Text(
+                                "Class: ${data['className']} - ${data['section']}",
+                              ),
+                              Text("Members: ${members.length}"),
+                            ],
+                          ),
+                        ),
+
+                        /// DELETE ICON (perfect top-right corner)
                         Positioned(
-                          right: 0,
                           top: 0,
+                          right: 0,
                           child: IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () => _deleteGroup(context),
                           ),
-                        ),
-
-                        /// GROUP INFO
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              data['projectTitle'] ?? '',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            Text("Domain: ${data['domain'] ?? '-'}"),
-
-                            Text(
-                              "Class: ${data['className']} - ${data['section']}",
-                            ),
-
-                            Text("Members: ${members.length}"),
-                          ],
                         ),
                       ],
                     ),
@@ -137,7 +135,6 @@ class GroupDetailPage extends StatelessWidget {
 
                 const SizedBox(height: 25),
 
-                /// STUDENT DETAILS TITLE
                 const Text(
                   "Student Details",
                   style: TextStyle(
@@ -148,7 +145,6 @@ class GroupDetailPage extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                /// STUDENT LIST
                 members.isEmpty
                     ? const Text("No students added")
                     : Column(
